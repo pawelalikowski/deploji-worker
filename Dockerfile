@@ -6,10 +6,10 @@ RUN go mod download
 COPY . .
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o /go/bin/deploji-worker .
 
-FROM alpine:latest
-RUN apk update && apk --no-cache add ca-certificates openssh ansible py3-lxml tar curl \
-    python3-dev py3-pip bash krb5 krb5-dev gcc musl-dev
-RUN pip3 install "pywinrm>=0.3.0" "pywinrm[kerberos]" jmespath lxml
+FROM alpine/ansible:2.16.1
+RUN apk update && apk --no-cache add ca-certificates py3-lxml tar curl \
+    python3-dev py3-pip bash krb5 krb5-dev gcc musl-dev py3-jmespath py3-lxml pipx
+RUN pipx install --include-deps "pywinrm>=0.3.0" "pywinrm[kerberos]" && pipx ensurepath
 RUN ansible-galaxy collection install community.general ansible.windows community.windows
 WORKDIR /root/
 ENV SSH_KNOWN_HOSTS=/root/known_hosts
